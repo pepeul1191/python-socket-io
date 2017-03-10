@@ -4,17 +4,23 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO,send
 from unqlite import UnQLite
+import db
 import requests
-import json
+import json 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
+# Operaciones SocketIO
+
 @socketio.on('message')
-def handle_message(message):
-    print ('message : ' + message)
-    send(message, broadcast = True)
+def handle_message(data):
+    print ('message : ' + data)
+    db = connection()
+    db.collection('conversacion_test').store(data)
+
+    send(data, broadcast = True)
     #emit('handle_forward_message', data, broadcast=True)
 
 @socketio.on('connect')
@@ -30,31 +36,15 @@ def handle_forward_message(message):
     print('received message: ' + message)
     #emit('my response', data, broadcast=True)
 
+# Operaciones con la base de datos UnQlite
+
 def connection():
 	return UnQLite('db/socket.db')
 
-def drop_collections():
-	db = connection()
-	if db.collection('usuarios').exists() == True:
-		db.delete('usuarios')
-
-def cargar_usuarios():
-	url = 'http://localhost:5001/usuario/listar_usuarios'
-	response = json.loads(requests.get(url).text)
-	db = connection()
-
-	if db.collection('usuarios').exists() != True:
-		db.collection('usuarios').create()
-
-	for usuario in response:
-		db.collection('usuarios').store(usuario)
-
-def query():
-	db = connection()
-	print db.collection('usuarios').all()
+# Main
 
 if __name__ == '__main__':
-	#socketio.run(app, port=4000)
+	socketio.run(app, port=4000)
 	#drop_collections()
 	#cargar_usuarios()
 	
