@@ -40,8 +40,8 @@ def filter_test(document):
 
 def select_conversacion_test():
 	db = connection()
-	#rs = db.collection('conversacion_test').all()
-	rs = db.collection('conversacion_test').filter(filter_test)
+	rs = db.collection('conversacion_test').all()
+	#rs = db.collection('conversacion_test').filter(filter_test)
 	for r in rs:
 		print r
 

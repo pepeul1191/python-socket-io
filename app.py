@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template
-from flask_socketio import SocketIO,send
+from flask_socketio import SocketIO,send, emit
 from unqlite import UnQLite
-import db
+from db import connection
 import requests
-import json 
+import json
+import pprint 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -27,6 +28,11 @@ def handle_message(data):
 def handle_connect():
     print 'socket conectado'
 
+@socketio.on('cargar_mensajes')
+def cargar_mensajes():
+	db = connection()
+	return db.collection('conversacion_test').all()
+
 @socketio.on('disconnect')
 def on_leave():
 	print 'Usuario desconectado'
@@ -35,11 +41,6 @@ def on_leave():
 def handle_forward_message(message):
     print('received message: ' + message)
     #emit('my response', data, broadcast=True)
-
-# Operaciones con la base de datos UnQlite
-
-def connection():
-	return UnQLite('db/socket.db')
 
 # Main
 
